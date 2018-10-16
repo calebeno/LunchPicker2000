@@ -1,7 +1,7 @@
-var express    = require('express');
-var Webtask    = require('webtask-tools');
-var bodyParser = require('body-parser');
-var app = express();
+let express    = require('express');
+let Webtask    = require('webtask-tools');
+let bodyParser = require('body-parser');
+let app = express();
 
 app.use(bodyParser.json());
 
