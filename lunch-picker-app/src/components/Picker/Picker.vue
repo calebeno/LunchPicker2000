@@ -5,9 +5,9 @@
         <h3 class="alts" v-if="alts"><span v-for="alt in alts">{{ alt.name }}</span></h3>
         <h3>Attendee List:</h3>
         <ul class="attendee-list">
-            <li v-for="attendee in lunchAttendees" v-bind:class="{'going': attendee.goingToday}"
-                v-on:click="setGoing(attendee)">
-                {{ attendee.name }}
+            <li v-for="attendee in lunchAttendees">
+                <!--{{ attendee.name }}-->
+                <AttendeeTile v-bind:attendee="attendee" v-on:disable-all="disableAllPlacesForAttendees"/>
             </li>
         </ul>
         <div class="clear"></div>
@@ -28,11 +28,13 @@
 <script lang="ts">
     import {Component, Vue} from 'vue-property-decorator';
     import {FoodPlace, FoodPlacesToEat, LunchAttendee} from '../../models/picker.model';
+    import AttendeeTile from '../AttendeeTile/AttendeeTile.vue';
 
     const ATTENDEES_URL = 'https://wt-c9692eeb1a6b9318315707773d5d6972-0.sandbox.auth0-extend.com/Lunch2000/attendees';
     const FOOD_URL = 'https://wt-c9692eeb1a6b9318315707773d5d6972-0.sandbox.auth0-extend.com/Lunch2000/food';
-
-    @Component
+    @Component({
+        components: {AttendeeTile},
+    })
     export default class Picker extends Vue {
         // @Prop() private msg!: string;
 
@@ -42,25 +44,25 @@
         public alts: FoodPlacesToEat[] = [];
 
         public created() {
-            console.log('HERE');
-            this.getFoodPlaces();
-            this.getLunchAttendees();
+            this.fetchFoodPlacesFromServer();
+            this.fetchLunchAttendeesFromServer();
         }
 
         public showPrimary() {
-            return this.primary != FoodPlacesToEat.None;
+            return this.primary !== FoodPlacesToEat.None;
         }
 
-        public setGoing(attendee: LunchAttendee) {
-            attendee.goingToday = !attendee.goingToday;
-        }
+        // public setGoing(attendee: LunchAttendee) {
+        //     attendee.goingToday = !attendee.goingToday;
+        //     this.disableAllPlacesForAttendees();
+        // }
 
         public setOption(foodPlace: FoodPlace) {
             foodPlace.okOption = !foodPlace.okOption;
         }
 
         public generate() {
-            const attending: LunchAttendee[] = this.lunchAttendees.filter((attendee: LunchAttendee) => attendee.goingToday);
+            const attending = this.getConfirmedAttendees();
             const acceptable: FoodPlace[] = this.foodPlaces.filter((place: FoodPlace) => place.okOption)
                 .filter((place: FoodPlace) => {
                     return !attending.some((attendee: LunchAttendee) => {
@@ -72,18 +74,34 @@
             }
         }
 
-        private getLunchAttendees() {
+        public disableAllPlacesForAttendees() {
+            const attending = this.getConfirmedAttendees();
+            const dislikeList = this.foodPlaces.filter((place: FoodPlace) => {
+                return attending.some((attendee: LunchAttendee) => {
+                    return attendee.dislikes.some((dislike: FoodPlacesToEat) => dislike === place.name);
+                });
+            });
+            this.foodPlaces.forEach((place: FoodPlace) => {
+                place.okOption = !dislikeList.some((dislikePlace: FoodPlace) => dislikePlace.name === place.name);
+            });
+        }
+
+        private getConfirmedAttendees(): LunchAttendee[] {
+            return this.lunchAttendees.filter((attendee: LunchAttendee) => attendee.goingToday);
+        }
+
+        private fetchLunchAttendeesFromServer() {
             (Vue as any).http.get(ATTENDEES_URL)
                 .then((res: any) => {
-                    console.log(res.body);
+                    // console.log(res.body);
                     this.lunchAttendees = res.body;
                 });
         }
 
-        private getFoodPlaces() {
+        private fetchFoodPlacesFromServer() {
             (Vue as any).http.get(FOOD_URL)
                 .then((res: any) => {
-                    console.log(res.body);
+                    // console.log(res.body);
                     this.foodPlaces = res.body;
                 });
         }
@@ -97,22 +115,9 @@
         list-style: none;
     }
 
-    ul.attendee-list li {
+    li {
         display: block;
-        float: left;
-        width: 100px;
-        height: 40px;
-        background-color: grey;
-        border-radius: 5px;
-        border: 2px grey solid;
-        text-align: center;
-        line-height: 40px;
-        cursor: pointer;
-    }
-
-    ul.attendee-list li.going {
-        background-color: gold;
-        border: 2px black solid;
+        margin: 8px;
     }
 
     ul.food-list li {
@@ -132,10 +137,6 @@
     ul.food-list li.ok-option {
         background-color: green;
         color: white;
-    }
-
-    li {
-        margin: 8px;
     }
 
     h2 {
