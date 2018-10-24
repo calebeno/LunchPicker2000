@@ -4,10 +4,20 @@
         <h3 class="primary" v-if="showPrimary()">{{ primary }}</h3>
         <h3 class="alts" v-if="alts"><span v-for="alt in alts">{{ alt.name }}</span></h3>
         <h3>Attendee List:</h3>
+        {{ selectedAttendee }}
+        <AttendeeDetail
+                v-if="selectedAttendee"
+                v-bind:attendee="selectedAttendee"
+                v-bind:food-places="foodPlaces"
+                v-on:deselect-attendee="deselectAttendee"
+        />
         <ul class="attendee-list">
             <li v-for="attendee in lunchAttendees">
-                <!--{{ attendee.name }}-->
-                <AttendeeTile v-bind:attendee="attendee" v-on:disable-all="disableAllPlacesForAttendees"/>
+                <AttendeeTile
+                        v-bind:attendee="attendee"
+                        v-on:disable-all="disableAllPlacesForAttendees"
+                        v-on:select-attendee="selectAttendee"
+                />
             </li>
         </ul>
         <div class="clear"></div>
@@ -29,39 +39,44 @@
     import {Component, Vue} from 'vue-property-decorator';
     import {FoodPlace, FoodPlacesToEat, LunchAttendee} from '../../models/picker.model';
     import AttendeeTile from '../AttendeeTile/AttendeeTile.vue';
+    import AttendeeDetail from '../AttendeeDetaill/AttendeeDetail.vue';
 
     const ATTENDEES_URL = 'https://wt-c9692eeb1a6b9318315707773d5d6972-0.sandbox.auth0-extend.com/Lunch2000/attendees';
     const FOOD_URL = 'https://wt-c9692eeb1a6b9318315707773d5d6972-0.sandbox.auth0-extend.com/Lunch2000/food';
     @Component({
-        components: {AttendeeTile},
+        components: {AttendeeDetail, AttendeeTile},
     })
     export default class Picker extends Vue {
         // @Prop() private msg!: string;
 
-        public lunchAttendees: LunchAttendee[] = [];
-        public foodPlaces: FoodPlace[] = [];
-        public primary: FoodPlacesToEat = FoodPlacesToEat.None;
-        public alts: FoodPlacesToEat[] = [];
+        lunchAttendees: LunchAttendee[] = [];
+        foodPlaces: FoodPlace[] = [];
+        primary: FoodPlacesToEat = FoodPlacesToEat.None;
+        alts: FoodPlacesToEat[] = [];
+        selectedAttendee: LunchAttendee | null = null;
 
-        public created() {
+        created() {
             this.fetchFoodPlacesFromServer();
             this.fetchLunchAttendeesFromServer();
         }
 
-        public showPrimary() {
+        showPrimary() {
             return this.primary !== FoodPlacesToEat.None;
         }
 
-        // public setGoing(attendee: LunchAttendee) {
-        //     attendee.goingToday = !attendee.goingToday;
-        //     this.disableAllPlacesForAttendees();
-        // }
-
-        public setOption(foodPlace: FoodPlace) {
+        setOption(foodPlace: FoodPlace) {
             foodPlace.okOption = !foodPlace.okOption;
         }
 
-        public generate() {
+        selectAttendee(attendee: LunchAttendee) {
+            this.selectedAttendee = attendee;
+        }
+
+        deselectAttendee() {
+            this.selectedAttendee = null;
+        }
+
+        generate() {
             const attending = this.getConfirmedAttendees();
             const acceptable: FoodPlace[] = this.foodPlaces.filter((place: FoodPlace) => place.okOption)
                 .filter((place: FoodPlace) => {
@@ -74,7 +89,7 @@
             }
         }
 
-        public disableAllPlacesForAttendees() {
+        disableAllPlacesForAttendees() {
             const attending = this.getConfirmedAttendees();
             const dislikeList = this.foodPlaces.filter((place: FoodPlace) => {
                 return attending.some((attendee: LunchAttendee) => {
@@ -174,10 +189,6 @@
     .gen-food:hover {
         background-color: red;
         color: white;
-    }
-
-    .clear {
-        clear: both;
     }
 
 </style>

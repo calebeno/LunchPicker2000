@@ -1,11 +1,12 @@
 <template>
     <div class="attendee"
          v-bind:class="{'going': attendee.goingToday}">
-        <div class="info-toggle">
+        <div class="info-toggle"
+             v-on:click="selectAttendee()">
             {{ attendee.name }}
         </div>
         <div class="going-toggle"
-             v-on:click="setGoing(attendee)">
+             v-on:click="setGoing()">
             <span v-if="attendee.goingToday">YES</span>
             <span v-if="!attendee.goingToday">NO</span>
         </div>
@@ -20,9 +21,13 @@
     export default class AttendeeTile extends Vue {
         @Prop() private attendee!: LunchAttendee;
 
-        public setGoing(attendee: LunchAttendee) {
-            attendee.goingToday = !attendee.goingToday;
+        setGoing() {
+            this.attendee.goingToday = !this.attendee.goingToday;
             this.$emit('disable-all');
+        }
+
+        selectAttendee() {
+            this.$emit('select-attendee', this.attendee);
         }
     }
 </script>
@@ -71,5 +76,4 @@
             color: white;
         }
     }
-
 </style>
