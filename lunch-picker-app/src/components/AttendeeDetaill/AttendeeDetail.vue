@@ -36,7 +36,7 @@
 <script lang="ts">
     import {Component, Prop, Vue} from 'vue-property-decorator';
     import {FoodPlace, FoodPlacesToEat, LunchAttendee} from '../../models/picker.model';
-    import {UpdateDislikesBody} from '../../../../lunch-picker-server/types/api.js';
+    import {UpdateDislikesBody} from '../../../../lunch-picker-server/src/api';
 
     const UPDATE_DISLIKES_URL = 'https://wt-c9692eeb1a6b9318315707773d5d6972-0.sandbox.auth0-extend.com/Lunch2000/updateDislikes';
 

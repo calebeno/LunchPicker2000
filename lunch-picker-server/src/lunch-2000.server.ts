@@ -1,5 +1,5 @@
-import {Express, Response} from 'express';
-import {UpdateDislikesRequest, WebtaskRequest} from '../types/api';
+import {Express} from 'express';
+import {UpdateDislikesRequest, WebtaskRequest} from './api';
 
 let express = require('express'); // tslint:disable-line
 let bodyParser = require('body-parser'); // tslint:disable-line
