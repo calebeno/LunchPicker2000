@@ -1,0 +1,28 @@
+{
+  "name": "lunchpicker2000",
+  "version": "0.1.0",
+  "description": "## Project setup ``` npm install ```",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "build": "npm run app-build && npm run server-build",
+    "app-build": "(cd lunch-picker-app && npm run build)",
+    "server-build": "(cd lunch-picker-server && npm run build)"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/calebeno/LunchPicker2000.git"
+  },
+  "author": "Caleb Eno",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/calebeno/LunchPicker2000/issues"
+  },
+  "homepage": "https://github.com/calebeno/LunchPicker2000#readme",
+  "devDependencies": {
+    "tslint": "^5.11.0",
+    "typescript": "^3.1.3"
+  }
+}
