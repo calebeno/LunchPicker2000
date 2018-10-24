@@ -1,5 +1,5 @@
-import {Express} from 'express';
-import {WebtaskRequest} from '../types/api';
+import {Express, Response} from 'express';
+import {UpdateDislikesRequest, WebtaskRequest} from '../types/api';
 
 let express = require('express'); // tslint:disable-line
 let bodyParser = require('body-parser'); // tslint:disable-line
@@ -8,12 +8,12 @@ const app: Express = express();
 
 app.use(bodyParser.json());
 
-app.get('/', (req, res) => {
-  res.sendStatus(200);
-});
+// app.get('/', (req, res) => {
+//   res.sendStatus(200);
+// });
 
 app.get('/food', (req: WebtaskRequest, res) => {
-  req.webtaskContext.storage.get((err: any, data: any) => {
+  req.webtaskContext.storage.get((err, data) => {
     if (err) {
         res.sendStatus(500);
     }
@@ -22,7 +22,7 @@ app.get('/food', (req: WebtaskRequest, res) => {
 });
 
 app.get('/attendees', (req: WebtaskRequest, res) => {
-  req.webtaskContext.storage.get((err: any, data: any) => {
+  req.webtaskContext.storage.get((err, data) => {
     if (err) {
         res.sendStatus(500);
     }
@@ -32,7 +32,7 @@ app.get('/attendees', (req: WebtaskRequest, res) => {
 
 app.post('/addFood', (req: WebtaskRequest, res) => {
   console.log(req.body);
-  req.webtaskContext.storage.get((err: any, data: any) => {
+  req.webtaskContext.storage.get((err, data) => {
     if (err) {
         res.sendStatus(500);
     }
@@ -45,13 +45,30 @@ app.post('/addFood', (req: WebtaskRequest, res) => {
       });
     }
     data.foodPlaces = food;
-    req.webtaskContext.storage.set(data, (error: any) => {
+    req.webtaskContext.storage.set(data, (error) => {
       if (error) {
           res.sendStatus(500);
       }
       res.sendStatus(200);
     });
   });
+});
+
+app.put('/updateDislikes', (req: UpdateDislikesRequest, res) => {
+    req.webtaskContext.storage.get((error, data) => {
+        if (error) {
+            res.sendStatus(500);
+        }
+        const attendeeInfo = data.lunchAttendees.find((attendee) => attendee.name === req.body.attendeeName);
+        attendeeInfo.dislikes = req.body.newDislikeList;
+
+        req.webtaskContext.storage.set(data, (err) => {
+            if (err) {
+                res.sendStatus(500);
+            }
+            res.sendStatus(200);
+        });
+    });
 });
 
 module.exports = Webtask.fromExpress(app);

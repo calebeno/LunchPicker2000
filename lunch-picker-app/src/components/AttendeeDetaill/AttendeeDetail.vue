@@ -36,6 +36,9 @@
 <script lang="ts">
     import {Component, Prop, Vue} from 'vue-property-decorator';
     import {FoodPlace, FoodPlacesToEat, LunchAttendee} from '../../models/picker.model';
+    import {UpdateDislikesBody} from '../../../../lunch-picker-server/types/api.js';
+
+    const UPDATE_DISLIKES_URL = 'https://wt-c9692eeb1a6b9318315707773d5d6972-0.sandbox.auth0-extend.com/Lunch2000/updateDislikes';
 
     @Component
     export default class AttendeeDetail extends Vue {
@@ -56,7 +59,18 @@
             if (!this.editMode) {
                 this.editMode = true;
             } else {
-                this.editMode = false;
+                let dislikeUpdateBody: UpdateDislikesBody = {
+                    attendeeName: this.attendee.name,
+                    newDislikeList: this.attendee.dislikes
+                };
+
+                (Vue as any).http.put(UPDATE_DISLIKES_URL, dislikeUpdateBody)
+                    .then(() => {
+                        this.editMode = false;
+                    })
+                    .catch((err: any) => {
+                        console.log(err);
+                    });
             }
         }
 
